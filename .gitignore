@@ -1,0 +1,451 @@
+				   
+            .-.____________________.-.
+     ___ _.' .-----.    _____________|======+----------------------------------+
+    /_._/   (      |   /_____________|      |                                  |
+      /      `  _ ____/                     |      Quebra de hashes Linux      |
+     |_      .\( \\                         |    Escrito por B0b0_d4_c0rt3     |
+    .'  `-._/__`_//                         |__________________________________|                      
+  .'       |""""'                                                 Março de 2012
+ /        /
+/        |
+|        '                               " A vida é o cão de saia " - Zé Firmino.
+|         \
+`-._____.-'								   
+                                       
+			
+	
+          TÓPICOS
+ 
+ 1. Introdução
+ 2. Cracking!
+  2.1 Quebra de Hashes DES 
+  2.2 Aumento de segurança
+  2.3 Outro algoritmo
+  2.4 QUEBRANDO SHA256
+ 3. Conclusão
+ 
+ 
++-------------------------------------------------------------------------+
+ 
+ 
+ 1> Introdução
+  O sistema de login e senha é um dos esquemas de segurança mais antigos
+  e funcionais que existe.
+  
+  A história do uso de senhas é bem antiga, datada da Idade Média onde
+  donos de fortalezas requisitavam uma palavra chave para que as pessoas
+  pudessem entrar quando dissesse a palavra correta.
+  
+  Na década de 60, começaram a intensificar as pesquisas e o desenvolvi-
+  mento de novas tecnologias. Foi aí que surgiram sistemas operacionais
+  robustos e multiusuários.
+  
+  Para poder diferenciar as pessoas e impedir que qualquer um possa ter 
+  acesso aos computadores, cientistas do MIT implementaram o esquema da 
+  "palavra chave" para o mundo virtual.
+  
+  Foi aí que surgiram as primeiras telas de login e senha.
+  
+  Mas além de criar um esquema que impeça o uso dos computadores por pessoas
+  não autorizadas, é necessário que aja um mecanismo de autenticação relati-
+  vamente seguro no momento do login, para que impeça a ação dos mais espertos.
+  
+  Para isso, sistemas Unix like armazenam em um arquivo configurações de
+  cada conta de usuário cadastrada no sistema. Nessas configurações são
+  encontradas informações do login e da senha de cada usuário.
+  
+  Há uns anos atrás, sistemas *nix implementavam em um único arquivo chamado
+  "passwd" essas configurações. 
+  
+  Como é um grande risco de segurança armazenar diretamente as senhas em um 
+  arquivo, os sistemas operacionais armazenam o hash delas.
+  
+  Um hash é um conjunto de caracteres de quantidade determinada, gerada com
+  base em um "algoritmo de hash". Hashes são muito usados no auxílio de com-
+  parações, seja na realização de teste de integridade de arquivos ou compa-
+  ração de strings uma vez que cada hash gerado com base em um arquivo ou
+  string é único. 
+  
+  Tecnicamente, é impossível "decifrar" um hash de alguma string, já que 
+  hashes se diferem de cifras.
+  
+  Quando uma pessoa insere seu nome de usuário e a sua senha em uma área de
+  login em um terminal virtual do Unix (tty), o sistema gerará um hash da 
+  senha fornecida e irá comparar o hash gerado com o hash armazenado no arquivo 
+  passwd. Se os dois hashes forem iguais, a senha é considerada correta e o 
+  acesso é liberado com a chamada do interpretador de comandos (shell).
+  
+  Um arquivo passwd na grande maioria das vezes se encontra no diretório /etc.
+  Este é um arquivo texto que por padrão deve ter permissão 644, ou seja, 
+  permissão de leitura e escrita para o root e apenas leitura para todos os
+  usuários, já que o sistema PRECISA ler este arquivo para realizar a autenticação.
+  
+  Cada conta criada no sistema tem uma linha no arquivo /etc/passwd. Cada linha
+  tem informações muito importantes para a autenticação. Vejamos a estrutura das
+  linhas do passwd:
+  
+       Usuário : Hash_senha : ID : GroupID : Informações : Dir_User : Shell
+  
+  As informações são separadas por dois pontos (":"). Dentre as várias informações 
+  a que nos interessa são as duas primeiras:
+  
+                              Usuário : Hash_senha 
+							  
+ 
+ 2> Cracking!
+ 
+  Uffa! Que tamanho de introdução, hein ?
+  Como foi dito, a muitos anos atrás as informações dos usuários eram encontradas
+  em uma única linha em um único arquivo que por padrão deve ter acesso de leitura
+  para todas as contas do sistema. Isso quer dizer que os hashes das senhas de todos
+  os usuários também era acessível para qualquer um (bastava dar um cat /etc/passwd 
+  e tudo era mostrado).
+  
+  O algoritmo usado nos hashes do passwd era o DES. Vejamos um exemplo de uma linha 
+  do passwd em um antigo sistema *nix:  
+  
+        fernando:AZl.zWwxIh15Q:508:10:Fernando Gomes:/home/fernando:/bin/sh
+  
+  Como podem ver, o hash da senha do usuário "fernando" é: "AZl.zWwxIh15Q". De posse
+  deste hash, um "hacker" poderia usar algum software que consiga quebrar o hash,
+  mostrando a verdadeira senha.
+  
+  Existem algumas técnicas para quebra de hash, tudo depende do algoritmo. Mas a
+  principal maneira de se "quebrar" é usando a antiga técnica de brute force na
+  realização de centenas de comparações do hash de palavras de uma wordlist com 
+  o hash á ser quebrado.
+  
+  Caso um dos hashes gerados pelo brute force bater com o a ser quebrado, o ataque
+  é considerado um sucesso e a string dona do hash é impressa na tela pelo software.
+  
+  ~> Quebra de Hashes DES
+    ---------------------- 
+  
+   Dois programas muito usados na época para quebra de hashes, era o Cracker Jack e
+   o John The Ripper.
+  
+   O John The Ripper é um cracker muito famoso e usado até hoje. Ele consegue quebrar
+   hashes DES, MD5 e LM (dentre outros). 
+  
+   Usando o John para quebrar o hash mostrado no exemplo, ele terá a seguinte saída:
+  
+  
+    C:\Users\Master\Desktop\run>john.exe -w:Wordlist.txt hash.txt
+    Loaded 1 password hash (Traditional DES [128/128 BS SSE2])
+    example          (?)
+    guesses: 1  time: 0:00:00:00 100%  c/s: 1142K  trying: exactes - exhumer
+    Use the "--show" option to display all of the cracked passwords reliably
+
+    C:\Users\Master\Desktop\run>
+
+  
+   Como podemos ver, o hash "AZl.zWwxIh15Q" corresponde a string "example". Isso quer
+   dizer que o usuário "fernando" possui a senha "example" no sistema.
+  
+    Alguns anos atrás, muitos servidores FTP deixavam habilitado o usuário "anonymous"
+    e por default o daemon deixava ter acesso somente leitura para todo o sistema. 
+    Isso quer dizer que um cara podia ter acesso ao diretório /etc, e quem sabe fazer 
+    downloads de arquivos para seu computador (get /etc/passwd).
+  
+   De posse do passwd do sistema, era só rodar algum cracker de senhas que depois de
+   um tempo ele já teria acesso a várias contas do servidor.  
+  
+   Em um futuro texto, pretendo falar mais sobre o John the Ripper, já o Cracker Jack 
+   é uma ferramenta antiga e absoleta e acho que nem vou escrever nada sobre ele ;D 
+  
+   Um hash DES Unix é composto por 13 caracteres, sendo os 2 primeiros o salt number.
+   Com este algoritmo, é possível gerar hashes de strings de no máximo 8 bytes.
+   
+    Para estudos, criei um programinha em C para sistemas Linux que consegue quebrar
+    hashes DES usando uma wordlist. Você pode baixá-lo no link abaixo:
+   
+                 http://www.b0b0labs.xpg.com.br/tools/DEScrack.c
+   
+    Este programa utiliza-se da função "crypt()" (função esta, que é fornecida pelo sistema 
+    para a geração de hashes), esta função é disponibilizada pela lib "libcrypt.so".
+    Para compilá-lo:
+   
+                   gcc DEScrack.c -o DEScrack -l crypt
+				  
+    A forma de usar ele é bem simples: basta ter uma wordlist (que pode ser baixada no
+    B0b0Store) e um arquivo texto onde estará o hash DES salvo. Apartir daí é só dar um:
+   
+                   ./DEScrack wordlist.txt hash.txt
+    
+    que o processo de quebra acontecerá ;D
+   
+  ~> Aumento de segurança
+    ----------------------
+	
+   Passado um tempo, os desenvolvedores de distros Linux começaram a perceber
+   a insegurança causada pelo uso de hashes DES. E a partir daí, implementaram
+   um outro algoritmo de hash no arquivo passwd.
+	 
+   Este é o MD5, agora com salt number de 12 caracteres, formando no total um
+   hash de 35 letras e números. Com este algoritmo, agora é possível usar senhas
+   de até 64 bytes (64 caracteres). 
+   
+   Hashes gerados em sistemas *nix atuais, estão usando uma estrutura como essa:
+     
+                $[IDENTIFICADOR]$[SALT NUMER]$[SENHA HASHEADA]
+				
+   A principal característica de um hash MD5 Unix, é seu início "$1$".
+   Vamos ver um exemplo de linha passwd usando MD5:
+   
+  rafael:$1$t0HfgMcj$p6Hj.CVMxYicdJuf8CzOg/:480:12:Rafa Borges:/home/rafael:/bin/bash
+   
+   O hash MD5 é maior: $1$t0HfgMcj$p6Hj.CVMxYicdJuf8CzOg/ .
+   Vamos dissecar um pouco mais:
+   
+                          $1$t0HfgMcj$p6Hj.CVMxYicdJuf8CzOg/
+                           |         |                     |
+    Indenticador "MD5" <---.         |                     |
+    Salt number   -------------------.                     |
+    Hash da senha -----------------------------------------.
+	
+	
+	
+ Criei um outro programinha que consegue quebrar MD5. 
+ Code:
+	
++----- Cut here ------+ +----- Cut here ------+ +----- Cut here ------+ +-----+
+
+  #include <stdio.h>
+  #include <unistd.h>
+  #include <string.h>
+  #include <stdlib.h>
+  #include <crypt.h>
+
+  void banner(void)
+   {
+    printf("\n+============================================+\n");
+    printf("+               Hash MD5 Crack               +\n");
+    printf("+              By: B0b0_d4_c0rt3             +\n");
+    printf("+============================================+\n\n");
+   }
+
+  main(int argc, char *argv[])
+  {
+   char *hash, *filehash, *getsalt;
+   FILE * senhas; 
+   FILE * hashs;
+ 
+   char senha_atual[30], crackeme[15];
+   //char *salt="$1$/iSaq7rB$";
+ 
+   if(argc < 2)
+   {
+    banner();
+    printf("Uso: %s <wordlist> <hash>\n",argv[0]);
+    exit(0);
+   }
+
+    senhas = fopen(argv[1],"r");
+    if (senhas == NULL)
+    {
+     banner();
+     fprintf(stderr," [-] Wordlist não encontrada.\n\n");
+     exit(-1);
+    }
+  
+    hashs = fopen(argv[2],"r");
+    if (hashs == NULL)
+    {
+     banner();
+     fprintf(stderr," [-] Arquivo com o hash não encontrado.\n\n");
+     exit(-1);
+    }
+  
+    filehash = fgets(crackeme,35,hashs);
+  
+    getsalt[0] = filehash[0];
+    getsalt[1] = filehash[1];
+    getsalt[2] = filehash[2];
+    getsalt[3] = filehash[3];
+    getsalt[4] = filehash[4];
+    getsalt[5] = filehash[5];
+    getsalt[6] = filehash[6];
+    getsalt[7] = filehash[7];
+    getsalt[8] = filehash[8];
+    getsalt[9] = filehash[9];
+    getsalt[10] = filehash[10];
+    getsalt[11] = filehash[11];
+    getsalt[11] = '\0';
+ 
+    banner();
+
+    printf(" [+] Iniciando quebra ...\n");
+  
+    while(fscanf(senhas, "%s", senha_atual) != EOF)
+    {
+   
+     hash = crypt(senha_atual,getsalt);
+        
+     if ((strcmp(hash,filehash))==0)
+     {
+                                   printf("  + Hash quebrado!\n");
+                                   printf("  + O hash é: %s\n",senha_atual);
+                                   exit(0);
+     }
+  
+     } 
+    
+    printf("  [-] Não deu!\n");
+    fclose(senhas);
+    exit (0);
+  } 
+
++----- Cut here ------+ +----- Cut here ------+ +----- Cut here ------+ +-----+
+	
+  
+    Compile com:
+	
+	gcc MD5crack.c -o MD5crack -l crypt
+	
+	Execute com:
+	
+	./MD5crack wordlist.txt file.with.archive.txt
+	
+	
+  Mas só implementar o MD5 não era o bastante, já que os hashes continuavam
+  a disposição de qualquer filho de Deus. Então, de um tempo pra cá, sistemas
+  Unix Like utilizam o chamado "sombreamento de senhas", que é a separação
+  de informações mais críticas do arquivo passwd para outro arquivo.
+	
+  Sistemas atuais utilizam o arquivo "shadow" para armazenagem de hashes e
+  outros dados, como data de expiração do usuário.
+
+  O arquivo shadow localizado no diretório /etc, tem permissão 600 apenas para
+  o root, ou seja, apenas o usuário root pode ler e alterar este arquivo.	
+    
+  Apartir da implementação do arquivo shadow, as linhas de usuários do passwd
+  passaram a ter o seguinte modelo:
+  
+            rafael:x:480:12:Rafa Borges:/home/rafael:/bin/bash
+			
+  No local onde localizava o hash, agora possui um "x". Este "x" é o que
+  identifica que o hash se encontra em outro arquivo. Em alguns sistemas,
+  pode-se encontrar um sinal de exclamação "!" no lugar do "x", o que quer
+  dizer a mesma coisa.
+  
+  Já no arquivo shadow vamos ver como ficaria:
+  
+  rafael:$1$t0HfgMcj$p6Hj.CVMxYicdJuf8CzOg/:11067:0:99999:7:-1:-1:134537684
+  
+  O.o Aí sim, hein?!
+  
+  ~> Outro algoritmo
+    -----------------
+  Sistemas mais atuais, estão usando um outro algoritmo para geração de 
+  hashes: o SHA256.
+  
+  Anos atrás, o governo americano padronizou o DES como algoritmo padrão
+  para ser usado pelos Estados Unidos. Mas perceberam que o DES não era
+  lá aquela coisa toda. Na década de 90 a NSA resolveu criar seu próprio
+  algoritmo de hashing: o SHA. Sendo este, o algoritmo padrão hoje.
+  
+  SHA é a sigla para "Secure Hash Algorithm" e da década de 90 pra cá, 
+  surgiram algumas variantes deste algoritmo. Então, podemos concluir que
+  SHA é uma "família" de algoritmos de hash, existindo variações dela.
+  
+  Uma dessas variações é a SHA256, que consegue gerar hashes de senhas
+  de até 128 caracteres. Nos sistemas Linux atuais, suas senhas de usuário
+  estão armazenadas no arquivo /etc/shadow usando este algoritmo.
+  
+  O que indica que um hash como sendo SHA256 em sistema Unix Like, é 
+  seu início: "$6$".
+  
+  Vamos ver um exemplo de linha shadow usando o SHA256:
+
+ root:$6$rLI31eq8$r6yzS/pGvpiizTqEUDx/ADMLq/g.6afVvZFhex9bx/GsjigoH.7VDaENhvsPWUogx9JIczpR2B7SR4AkYbl36/:15415:0:99999:7:::  
+ 
+ 
+  Opa! Perceberam a diferença do hash agora ?
+  Vamos ver uma pequena cronologia da evolução dos hashes:
+  
+  DES: AZl.zWwxIh15Q
+  MD5: $1$t0HfgMcj$p6Hj.CVMxYicdJuf8CzOg/
+  SHA256: $6$rLI31eq8$r6yzS/pGvpiizTqEUDx/ADMLq/g.6afVvZFhex9bx/GsjigoH.7VDaENhvsPWUogx9JIczpR2B7SR4AkYbl36/
+  
+  Vixiii!
+  Mas e agora? Sistemas Linux se tornaram blindados por causa da implementação
+  deste algoritmo ?
+  
+  Bem, para queimar a língua de um professor arrogante e autoritário que
+  eu tive que achava que o Linux era um sistema totalmente blindado, 
+  a resposta é NÃO!
+  
+  Pode-se usar brute force para quebra de SHA também!
+	
+  ~> QUEBRANDO SHA256
+    ------------------
+  O popular John The Ripper não quebra hashes SHA256. Para realizar tal façanha
+  irei usar o "Cryptcracker" desenvolvido em perl por Dan Faerch.
+  
+  Com o Cryptcracker é possível quebrar SHA256 e SHA512 por brute force.
+  Então precisaremos além deste programa, uma boa wordlist também.
+  
+  Sua utilização é simples, vamos ver alguns parâmetros:
+  
+  -f : Você indica o arquivo que se encontra o hash á ser quebrado. (OBRIGATÓRIO);
+  -o : Você indica um nome do arquivo que será gerado com o resultado da quebra. (OPCIONAL);
+  -t : Aqui você determina a quantidade de threads que serão usadas no processo de quebra. (OPCIONAL);
+  -q : Realiza o cracking de maneira "quieta", sem mostrar saídas na tela.(OPCIONAL);
+  
+  Por padrão ele usa 4 threads, mas com o parâmetro "-t" a quantidade pode ser alterada.
+  Você pode rodar o cryptcrack.pl de duas maneiras, tornando ele executável e rodando
+  com ./cryptcrack.pl ou simplesmente chamando o interpretador perl:
+  
+                        chmod +x cryptcrack.pl
+                        ./cryptcrack.pl
+  
+                                   ou
+  
+                        perl cryptcrack.pl
+  
+  Para iniciar a quebra, você terá que executar da seguinte forma:
+  
+   cat wordlist.txt | ./cryptcrack.pl -f ARQUIVO_HASH.txt
+   
+  Dessa forma, a saída do comando "cat" imprimindo o conteúdo do arquivo wordlist.txt
+  será concatenada na execução do Cryptcracker, onde ele irá usar as palavras recebidas
+  no processo de quebra.
+  
+  Dependendo do seu processador, da quantidade de threads estipuladas e da wordlist,
+  em poucos segundos o hash é quebrado.
+  
+  Vamos ver a saída da quebra do hash SHA256 mostrado agora a pouco:
+  
+  
+   root@root:~# cat wordlist.txt | ./cryptcrack.pl -f QUEBREME.txt 
+   Read 1 hashes from file
+   Spawning 4 threads
+   3.971 keys per second.
+   FOUND: 123 ($6$rLI31eq8$r6yzS/pGvpiizTqEUDx/ADMLq/g.6afVvZFhex9bx/GsjigoH.7VDaENhvsPWUogx9JIczpR2B7SR4AkYbl36/)
+   No hashes left to crack
+
+
+   Cracked passwords:
+   ---------------
+   123 ($6$rLI31eq8$r6yzS/pGvpiizTqEUDx/ADMLq/g.6afVvZFhex9bx/GsjigoH.7VDaENhvsPWUogx9JIczpR2B7SR4AkYbl36/)
+
+   root@root:~# 
+
+  
+  Em "Cracked passwords:" ele já mostra a string e seu respectivo hash.
+  
+  
+  
+ 3> Conclusão
+  Bem, se alguém leu este artigo, espero que tenha gostado.
+  Pesquisei muito para criar este texto que surgiu de um 
+  problema que tive ao tentar quebrar o hash do meu usuário
+  pelo John The Ripper.
+  Algumas definições como "salt number", "hash", "raibow table"
+  e "thread" pode ser encontrado em "Definições HACKA's" daqui
+  mesmo do B0b0labs.
+  
+  Ixiii tô até com as vistas cansadas
+  
+  Beijo do B0b0
+  []'s
